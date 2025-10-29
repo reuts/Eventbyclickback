@@ -1,0 +1,317 @@
+{
+  "kind": "collectionType",
+  "collectionName": "pages",
+  "info": {
+    "singularName": "page",
+    "pluralName": "pages",
+    "displayName": "Page",
+    "description": "Event pages with all configurations"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "hash": {
+      "type": "uid",
+      "targetField": "name"
+    },
+    "event_type": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::event-type.event-type",
+      "inversedBy": "pages"
+    },
+    "name_position": {
+      "type": "enumeration",
+      "enum": [
+        "top",
+        "bottom",
+        "center"
+      ],
+      "default": "bottom"
+    },
+    "field_profession": {
+      "type": "boolean",
+      "default": false
+    },
+    "field_phone": {
+      "type": "boolean",
+      "default": true
+    },
+    "field_newsletter": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_event_type": {
+      "type": "boolean",
+      "default": true
+    },
+    "is_online": {
+      "type": "boolean",
+      "default": false
+    },
+    "meeting_url": {
+      "type": "string"
+    },
+    "payment_required": {
+      "type": "boolean",
+      "default": false
+    },
+    "payment_url": {
+      "type": "string"
+    },
+    "payment_type": {
+      "type": "enumeration",
+      "enum": [
+        "bit",
+        "paypal",
+        "credit_card",
+        "bank_transfer",
+        "other"
+      ]
+    },
+    "player": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::player.player",
+      "inversedBy": "pages"
+    },
+    "goalID": {
+      "type": "string"
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "image_seo": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "image2": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "language": {
+      "type": "enumeration",
+      "enum": [
+        "ltr",
+        "rtl"
+      ],
+      "default": "rtl"
+    },
+    "footer_desc": {
+      "type": "richtext"
+    },
+    "event_date": {
+      "type": "datetime"
+    },
+    "event_date_i18": {
+      "type": "boolean",
+      "default": false
+    },
+    "time": {
+      "type": "time"
+    },
+    "end_time": {
+      "type": "time"
+    },
+    "time_text": {
+      "type": "string"
+    },
+    "event_end_date": {
+      "type": "datetime"
+    },
+    "ticket_link": {
+      "type": "string"
+    },
+    "special_msg": {
+      "type": "text"
+    },
+    "special_msg_colour": {
+      "type": "string",
+      "default": "#000000"
+    },
+    "background_color": {
+      "type": "string",
+      "default": "#e3a68b"
+    },
+    "special_msg_bg": {
+      "type": "string"
+    },
+    "desc_bg": {
+      "type": "string",
+      "default": "#fef8f6"
+    },
+    "extra_desc_bg": {
+      "type": "string"
+    },
+    "abstract_bg": {
+      "type": "string"
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "extra_description": {
+      "type": "richtext"
+    },
+    "abstract": {
+      "type": "richtext"
+    },
+    "text_color": {
+      "type": "string",
+      "default": "#ffffff"
+    },
+    "type_of_registration": {
+      "type": "string"
+    },
+    "get_tickets_text": {
+      "type": "string"
+    },
+    "send_email_registration": {
+      "type": "boolean",
+      "default": true
+    },
+    "display_last_name": {
+      "type": "boolean",
+      "default": true
+    },
+    "branded": {
+      "type": "boolean",
+      "default": true
+    },
+    "has_chat": {
+      "type": "boolean",
+      "default": true
+    },
+    "logo": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "location": {
+      "type": "string"
+    },
+    "show_strip": {
+      "type": "boolean",
+      "default": true
+    },
+    "upper_strip": {
+      "type": "boolean",
+      "default": true
+    },
+    "has_register": {
+      "type": "boolean",
+      "default": false
+    },
+    "disable_user_creation": {
+      "type": "boolean",
+      "default": false
+    },
+    "separate_event": {
+      "type": "boolean",
+      "default": false
+    },
+    "consolidated": {
+      "type": "boolean",
+      "default": true
+    },
+    "submit_btn_text": {
+      "type": "string"
+    },
+    "embed_type": {
+      "type": "enumeration",
+      "enum": [
+        "one",
+        "youtube",
+        "facebook",
+        "vimeo"
+      ]
+    },
+    "embed_id": {
+      "type": "string"
+    },
+    "embed_type2": {
+      "type": "enumeration",
+      "enum": [
+        "one",
+        "youtube",
+        "facebook",
+        "vimeo"
+      ]
+    },
+    "embed_id2": {
+      "type": "string"
+    },
+    "visual_embeds": {
+      "type": "component",
+      "repeatable": true,
+      "component": "embeds.visual-embed"
+    },
+    "facebook_pixel_id": {
+      "type": "string"
+    },
+    "avatar_on_register": {
+      "type": "boolean",
+      "default": true
+    },
+    "has_tickets_page": {
+      "type": "boolean",
+      "default": false
+    },
+    "file_description": {
+      "type": "text"
+    },
+    "additional_file": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "files"
+      ]
+    },
+    "has_lecturer": {
+      "type": "boolean",
+      "default": true
+    },
+    "lecturer_name": {
+      "type": "string"
+    },
+    "lecturer_desc": {
+      "type": "text"
+    },
+    "pixabay_cover_image": {
+      "type": "boolean",
+      "default": false
+    },
+    "speaker": {
+      "type": "component",
+      "repeatable": false,
+      "component": "content.speaker"
+    },
+    "speaker_tickets_page": {
+      "type": "component",
+      "repeatable": false,
+      "component": "content.speaker"
+    }
+  }
+}
