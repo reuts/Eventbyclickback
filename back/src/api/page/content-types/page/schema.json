@@ -28,12 +28,12 @@
     },
     "name_position": {
       "type": "enumeration",
+      "default": "bottom",
       "enum": [
         "top",
         "bottom",
         "center"
-      ],
-      "default": "bottom"
+      ]
     },
     "field_profession": {
       "type": "boolean",
@@ -110,11 +110,11 @@
     },
     "language": {
       "type": "enumeration",
+      "default": "rtl",
       "enum": [
         "ltr",
         "rtl"
-      ],
-      "default": "rtl"
+      ]
     },
     "footer_desc": {
       "type": "richtext"
@@ -264,8 +264,8 @@
     },
     "visual_embeds": {
       "type": "component",
-      "repeatable": true,
-      "component": "embeds.visual-embed"
+      "component": "embeds.visual-embed",
+      "repeatable": true
     },
     "facebook_pixel_id": {
       "type": "string"
@@ -305,13 +305,19 @@
     },
     "speaker": {
       "type": "component",
-      "repeatable": false,
-      "component": "content.speaker"
+      "component": "content.speaker",
+      "repeatable": false
     },
     "speaker_tickets_page": {
       "type": "component",
-      "repeatable": false,
-      "component": "content.speaker"
+      "component": "content.speaker",
+      "repeatable": false
+    },
+    "registers": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::register.register",
+      "mappedBy": "pages"
     }
   }
 }

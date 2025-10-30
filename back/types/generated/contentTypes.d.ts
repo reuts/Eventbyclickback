@@ -554,6 +554,10 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
       Schema.Attribute.DefaultTo<false>;
     player: Schema.Attribute.Relation<'manyToOne', 'api::player.player'>;
     publishedAt: Schema.Attribute.DateTime;
+    registers: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::register.register'
+    >;
     send_email_registration: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<true>;
     separate_event: Schema.Attribute.Boolean &
@@ -605,6 +609,37 @@ export interface ApiPlayerPlayer extends Struct.CollectionTypeSchema {
     name: Schema.Attribute.String & Schema.Attribute.Required;
     pages: Schema.Attribute.Relation<'oneToMany', 'api::page.page'>;
     phone: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiRegisterRegister extends Struct.CollectionTypeSchema {
+  collectionName: 'registers';
+  info: {
+    displayName: 'register';
+    pluralName: 'registers';
+    singularName: 'register';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    accept_terms: Schema.Attribute.Boolean;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::register.register'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String;
+    pages: Schema.Attribute.Relation<'manyToMany', 'api::page.page'>;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1125,6 +1160,7 @@ declare module '@strapi/strapi' {
       'api::event-type.event-type': ApiEventTypeEventType;
       'api::page.page': ApiPagePage;
       'api::player.player': ApiPlayerPlayer;
+      'api::register.register': ApiRegisterRegister;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
