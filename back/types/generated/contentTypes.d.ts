@@ -430,6 +430,85 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiCampaignCampaign extends Struct.CollectionTypeSchema {
+  collectionName: 'campaigns';
+  info: {
+    displayName: 'Campaign';
+    pluralName: 'campaigns';
+    singularName: 'campaign';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    event_hash: Schema.Attribute.String;
+    failed_count: Schema.Attribute.Integer;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::campaign.campaign'
+    > &
+      Schema.Attribute.Private;
+    mailing_list_id: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::mailing-list.mailing-list'
+    >;
+    name: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    sent_at: Schema.Attribute.DateTime;
+    sent_count: Schema.Attribute.Integer;
+    sent_status: Schema.Attribute.Enumeration<
+      ['draft', 'sending,', 'sent', 'failed']
+    >;
+    template_id: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::email-template.email-template'
+    >;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiEmailTemplateEmailTemplate
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'email_templates';
+  info: {
+    displayName: 'Email Template';
+    pluralName: 'email-templates';
+    singularName: 'email-template';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    body: Schema.Attribute.Blocks;
+    campaigns: Schema.Attribute.Relation<'oneToMany', 'api::campaign.campaign'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    event_hash: Schema.Attribute.String;
+    footer: Schema.Attribute.Text;
+    header: Schema.Attribute.Text;
+    is_ai_generated: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::email-template.email-template'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiEventTypeEventType extends Struct.CollectionTypeSchema {
   collectionName: 'event_types';
   info: {
@@ -454,6 +533,37 @@ export interface ApiEventTypeEventType extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     name: Schema.Attribute.String & Schema.Attribute.Required;
     pages: Schema.Attribute.Relation<'oneToMany', 'api::page.page'>;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiMailingListMailingList extends Struct.CollectionTypeSchema {
+  collectionName: 'mailing_lists';
+  info: {
+    displayName: 'Mailing List';
+    pluralName: 'mailing-lists';
+    singularName: 'mailing-list';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    campaigns: Schema.Attribute.Relation<'oneToMany', 'api::campaign.campaign'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    emails: Schema.Attribute.JSON;
+    event_hash: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::mailing-list.mailing-list'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1157,7 +1267,10 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::campaign.campaign': ApiCampaignCampaign;
+      'api::email-template.email-template': ApiEmailTemplateEmailTemplate;
       'api::event-type.event-type': ApiEventTypeEventType;
+      'api::mailing-list.mailing-list': ApiMailingListMailingList;
       'api::page.page': ApiPagePage;
       'api::player.player': ApiPlayerPlayer;
       'api::register.register': ApiRegisterRegister;

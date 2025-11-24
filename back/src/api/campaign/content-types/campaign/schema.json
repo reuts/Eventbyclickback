@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "campaigns",
+  "info": {
+    "singularName": "campaign",
+    "pluralName": "campaigns",
+    "displayName": "Campaign"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "template_id": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::email-template.email-template",
+      "inversedBy": "campaigns"
+    },
+    "mailing_list_id": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::mailing-list.mailing-list",
+      "inversedBy": "campaigns"
+    },
+    "event_hash": {
+      "type": "string"
+    },
+    "sent_status": {
+      "type": "enumeration",
+      "enum": [
+        "draft",
+        "sending,",
+        "sent",
+        "failed"
+      ]
+    },
+    "sent_count": {
+      "type": "integer"
+    },
+    "failed_count": {
+      "type": "integer"
+    },
+    "sent_at": {
+      "type": "datetime"
+    }
+  }
+}

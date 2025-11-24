@@ -1,0 +1,30 @@
+{
+  "kind": "collectionType",
+  "collectionName": "mailing_lists",
+  "info": {
+    "singularName": "mailing-list",
+    "pluralName": "mailing-lists",
+    "displayName": "Mailing List"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "emails": {
+      "type": "json"
+    },
+    "event_hash": {
+      "type": "string"
+    },
+    "campaigns": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::campaign.campaign",
+      "mappedBy": "mailing_list_id"
+    }
+  }
+}
