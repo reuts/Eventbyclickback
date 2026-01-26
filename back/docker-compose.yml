@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  strapi:
+    build: .
+    container_name: strapi-app
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "1337:1337"
+    networks:
+      - strapi_net
+      - postgres_default
+
+networks:
+  strapi_net:
+  postgres_default:
+    external: true
