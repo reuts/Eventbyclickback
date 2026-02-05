@@ -485,7 +485,7 @@ export interface ApiEmailTemplateEmailTemplate
     draftAndPublish: true;
   };
   attributes: {
-    body: Schema.Attribute.Blocks;
+    body: Schema.Attribute.Text;
     campaigns: Schema.Attribute.Relation<'oneToMany', 'api::campaign.campaign'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

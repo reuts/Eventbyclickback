@@ -17,9 +17,6 @@
     "header": {
       "type": "text"
     },
-    "body": {
-      "type": "blocks"
-    },
     "footer": {
       "type": "text"
     },
@@ -35,6 +32,9 @@
       "relation": "oneToMany",
       "target": "api::campaign.campaign",
       "mappedBy": "template_id"
+    },
+    "body": {
+      "type": "text"
     }
   }
 }
