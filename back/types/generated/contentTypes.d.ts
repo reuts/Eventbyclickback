@@ -461,7 +461,7 @@ export interface ApiCampaignCampaign extends Struct.CollectionTypeSchema {
     sent_at: Schema.Attribute.DateTime;
     sent_count: Schema.Attribute.Integer;
     sent_status: Schema.Attribute.Enumeration<
-      ['draft', 'sending,', 'sent', 'failed']
+      ['draft', 'sending', 'sent', 'failed']
     >;
     template_id: Schema.Attribute.Relation<
       'manyToOne',

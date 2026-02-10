@@ -33,7 +33,7 @@
       "type": "enumeration",
       "enum": [
         "draft",
-        "sending,",
+        "sending",
         "sent",
         "failed"
       ]
