@@ -46,6 +46,9 @@
     },
     "sent_at": {
       "type": "datetime"
+    },
+    "isAdd": {
+      "type": "boolean"
     }
   }
 }

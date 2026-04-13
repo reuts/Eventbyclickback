@@ -15,10 +15,10 @@
     "upgrade:dry": "npx @strapi/upgrade latest --dry"
   },
   "dependencies": {
-    "@strapi/plugin-cloud": "5.29.0",
-    "@strapi/plugin-users-permissions": "5.29.0",
-    "@strapi/provider-upload-cloudinary": "^5.29.0",
-    "@strapi/strapi": "5.29.0",
+    "@strapi/plugin-cloud": "5.42.0",
+    "@strapi/plugin-users-permissions": "5.42.0",
+    "@strapi/provider-upload-cloudinary": "5.42.0",
+    "@strapi/strapi": "5.42.0",
     "better-sqlite3": "11.3.0",
     "pg": "^8.16.3",
     "react": "^18.0.0",

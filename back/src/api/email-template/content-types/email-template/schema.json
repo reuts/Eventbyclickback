@@ -11,6 +11,12 @@
   },
   "pluginOptions": {},
   "attributes": {
+    "subject": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
     "name": {
       "type": "string"
     },
