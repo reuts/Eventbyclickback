@@ -1,0 +1,40 @@
+{
+  "collectionName": "components_forms_custom_fields",
+  "info": {
+    "displayName": "Custom Field",
+    "description": "A per-event registration question beyond the standard fields"
+  },
+  "options": {},
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "key": {
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "enumeration",
+      "required": true,
+      "default": "text",
+      "enum": [
+        "text",
+        "textarea",
+        "email",
+        "tel",
+        "number",
+        "date",
+        "select",
+        "checkbox"
+      ]
+    },
+    "required": {
+      "type": "boolean",
+      "default": false
+    },
+    "options": {
+      "type": "json"
+    }
+  }
+}

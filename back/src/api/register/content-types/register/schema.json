@@ -20,11 +20,62 @@
     "name": {
       "type": "string"
     },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
     "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "profession": {
+      "type": "string"
+    },
+    "newsletter": {
+      "type": "boolean",
+      "default": false
+    },
+    "extra_fields": {
+      "type": "json"
+    },
+    "password": {
+      "type": "password",
+      "private": true,
+      "searchable": false
+    },
+    "gender": {
+      "type": "string"
+    },
+    "birthday": {
+      "type": "date"
+    },
+    "role": {
+      "type": "enumeration",
+      "enum": [
+        "user",
+        "admin"
+      ],
+      "default": "user"
+    },
+    "profile": {
       "type": "string"
     },
     "accept_terms": {
       "type": "boolean"
+    },
+    "legacy_id": {
+      "type": "integer",
+      "private": true
+    },
+    "player_source": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::player.player",
+      "inversedBy": "registrants"
     }
   }
 }
