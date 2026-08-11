@@ -80,6 +80,10 @@
     "create_event_form": {
       "type": "json"
     },
+    "is_from_spin_to_win": {
+      "type": "boolean",
+      "default": false
+    },
     "legacy_id": {
       "type": "integer",
       "private": true
