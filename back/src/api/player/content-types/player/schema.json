@@ -25,6 +25,9 @@
     "phone": {
       "type": "string"
     },
+    "phone_2": {
+      "type": "string"
+    },
     "description": {
       "type": "text"
     },
