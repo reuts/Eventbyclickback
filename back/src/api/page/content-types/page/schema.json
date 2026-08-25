@@ -24,6 +24,15 @@
       "type": "integer",
       "private": true
     },
+    "page_type": {
+      "type": "enumeration",
+      "default": "save_spot",
+      "enum": [
+        "save_spot",
+        "contact_me",
+        "guide_download"
+      ]
+    },
     "event_type": {
       "type": "relation",
       "relation": "manyToOne",
