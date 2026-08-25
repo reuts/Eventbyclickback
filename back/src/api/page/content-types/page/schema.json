@@ -45,7 +45,10 @@
       "enum": [
         "top",
         "bottom",
-        "center"
+        "center",
+        "left",
+        "right",
+        "none"
       ]
     },
     "field_profession": {
@@ -81,7 +84,11 @@
     "payment_type": {
       "type": "enumeration",
       "enum": [
+        "url",
+        "paybox",
+        "paybox_personal",
         "bit",
+        "donation",
         "paypal",
         "credit_card",
         "bank_transfer",
@@ -363,6 +370,38 @@
       "relation": "manyToMany",
       "target": "api::register.register",
       "mappedBy": "pages"
+    },
+    "payment_display": {
+      "type": "enumeration",
+      "default": "free",
+      "enum": [
+        "paid",
+        "free",
+        "hidden"
+      ]
+    },
+    "show_middle_image": {
+      "type": "boolean",
+      "default": false
+    },
+    "second_extra_description": {
+      "type": "text"
+    },
+    "lecturer_image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "guide_pdf": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "files"
+      ]
     }
   }
 }
