@@ -71,6 +71,9 @@
       "type": "integer",
       "private": true
     },
+    "signed_up_at": {
+      "type": "datetime"
+    },
     "player_source": {
       "type": "relation",
       "relation": "manyToOne",

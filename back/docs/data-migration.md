@@ -66,11 +66,32 @@ strand the ones before it.
 | 5 | `properties` + `userpropertiesvalues` | `page.custom_fields` | step 4 |
 | 6 | `users` + `users_events` | `api::register` | steps 2, 4, 5 |
 
-## Step 1 — `events_types`, `event_categories`
+All six are scripted. Two schema fields were added for them and need a Strapi deploy
+before steps 1 and 6 run: `event-type.legacy_id` and `register.signed_up_at`.
 
-Both are `(id, name)`. `events_types` → `api::event-type`. Categories have no Strapi
-equivalent and the create wizard no longer asks for one — carry `category_id` into a
-note field or drop it, but decide before step 4.
+## Step 1 — `events_types`  ·  `scripts/migrate-event-types.js`
+
+`(id, name)`, so the mapping is the whole story. Two things worth knowing before reading
+the row count:
+
+**Every event the modern wizard created shares one type.** `GoSociali::__construct`
+resolves it by `env('EVENT_TYPE_NAME')` and `saveOrPublishEvent` pins
+`$event->event_type_id` to it. The table's ~45 rows are almost all historical. They are
+migrated anyway — old rows still point at them, and a dangling relation is worse than an
+unused entry.
+
+**`event-type` had no `legacy_id`.** Added in this branch, along with
+`register.signed_up_at`; both need a Strapi deploy before step 1 or step 6 can run.
+
+The script also adopts an entry created by hand in the admin: if a name matches and the
+entry has no `legacy_id`, it claims that entry instead of creating a duplicate.
+
+```bash
+node scripts/migrate-event-types.js events_types.json --apply
+```
+
+`event_categories` has no Strapi equivalent and the wizard no longer asks for one.
+`category_id` is **dropped**, and step 4 reports every row that had one.
 
 ## Step 2 — `players`  ·  `scripts/migrate-players.js`
 
@@ -193,28 +214,49 @@ node scripts/migrate-pages.js events.json --verify
 
 Run it **after** steps 1–3, or every image and relation comes back reported as missing.
 
-## Step 5 — questions → `custom_fields`
+## Step 5 — questions → `custom_fields`  ·  `scripts/migrate-questions.js`
 
-`properties` is a **global** table with no `event_id`. Which questions belonged to an
-event is only recoverable through `userpropertiesvalues.event_id`:
+**Three property ids are not custom fields at all.** Both `EventController`s hardcode
+them as the standard signup fields:
 
-```sql
-SELECT DISTINCT upv.event_id, p.id, p.name, p.name2, p.display_property, p.text_required
-FROM userpropertiesvalues upv
-JOIN properties p ON p.id = upv.propertyID;
+| id | Laravel | page | register |
+|---|---|---|---|
+| 39 | phone | `field_phone` | `phone` |
+| 24 | profession | `field_profession` | `profession` |
+| 41 | newsletter | `field_newsletter` | `newsletter` |
+
+They are skipped here and mapped onto real columns in step 6. Step 4 already carried the
+`field_*` booleans.
+
+`properties` is otherwise a **global** table. It has an `eventTypeID`, but that cannot
+say which questions an event asked — every modern event shares one event type (step 1).
+Only `userpropertiesvalues.event_id` links a question to an event, and it only knows
+about questions somebody actually answered.
+
+**That is less lossy than it sounds.** An event with no signups keeps its standard
+fields, because those are page columns. Only a genuinely custom question on a
+zero-signup event is unrecoverable — and the wizard never offered a way to create one, so
+in practice `custom_fields` comes out empty for most pages.
+
+Run `--inspect` against the live export **before the first apply**: it prints the
+distinct `display_property` / `commandType` shapes with counts, examples and what each
+maps to. The type table in the script was built from the stale dump; extend it with
+whatever shows up.
+
+```bash
+node scripts/migrate-questions.js --inspect
+node scripts/migrate-questions.js --apply
 ```
 
-Consequences to accept up front:
+- `key` is **`prop_<id>`** — derived from the numeric id, not the label. Labels are Hebrew
+  free text, they collide, and renaming a question must not orphan every answer already
+  recorded under it. Step 6 reads this from `question-map.json`, which is written even on
+  a dry run.
+- `label` prefers `name` over `name2` (`name` is what the signup listing GROUP_CONCATs);
+  a row where they differ is reported.
+- `propertiesvalues` becomes `options[]`, and its presence forces `type: select`.
 
-- **An event with no signups loses its question set.** There is no other link. Those
-  pages migrate with `custom_fields: []`.
-- `properties.name` / `name2` are the label pair — inspect which one is the Hebrew label.
-- `display_property` decides the `type`; `propertiesvalues` holds the option list for
-  dropdown-style questions and becomes `options[]`.
-- The generated `key` must be **stable and recorded**, because step 6 writes answers
-  keyed by it. Derive it once, store the `propertyID → key` map, reuse it.
-
-## Step 6 — signups → `api::register`
+## Step 6 — signups → `api::register`  ·  `scripts/migrate-registers.js`
 
 The signup is spread over three tables:
 
@@ -223,18 +265,32 @@ The signup is spread over three tables:
 - `users` — the registrant (`email`, `password`, `gender`, `birthday`, `role`,
   `profile`, `player_source_id`)
 
-Answers come from `userpropertiesvalues` (`users_events_id`, `propertyID`,
-`propertyValueID` as text) and go into `register.extra_fields`, keyed by the map from
-step 5.
+Answers come from `userpropertiesvalues` and go into `register.extra_fields`, keyed by
+the map from step 5.
 
-Watch for:
+**`legacy_id` holds the `users_events.id`, not the `users.id`.** A register is one
+signup, not one person: the same person signing up to three events is three rows in
+Laravel and three registers here, which is what the new model means. Keying on the user
+id would silently collapse them.
 
-- `users.password` is a Laravel hash. Registrants are not admin accounts; migrate the
-  hash only if they can actually sign in anywhere, otherwise leave it null.
-- The same person may appear as several `users` rows across events. Decide whether
-  `register` is per-signup (simplest, matches the new model) or deduplicated by email.
-  The new schema treats a register as **one signup**, so per-signup is the match.
-- `pages` is a many relation on `register`; link it to the page from step 4.
+**`propertyValueID` is a `text` column doing two jobs** — it holds either the id of a row
+in `propertiesvalues` or the answer itself. `EventController` resolves it with
+`IFNULL(propertiesvalues.propertyValue, propertyValueID)`, and so does the script.
+
+**`users.password` is deliberately not migrated.** Strapi hashes anything handed to a
+password column, so copying the Laravel hash through REST stores a hash of a hash —
+unusable, and worse than empty because it looks like a working credential. (This is the
+mirror image of the users step, which had to bypass REST for exactly that reason.)
+Registrants are signup records; nothing in the new app logs in as one.
+
+Names come from `users`, which is what the app's own listing reads. `users_events_info`
+is the older per-signup copy: used when the user row has no name, and reported when the
+two disagree — that is a person whose name changed between signups.
+
+```bash
+node scripts/migrate-registers.js --dump review.json
+node scripts/migrate-registers.js --apply
+```
 
 ## Not migrating
 
@@ -242,20 +298,35 @@ Watch for:
 `user_drafts`, `password_resets`, `failed_jobs`, `terms_policy`, `user_contacts`,
 `userpreferencesvalues`, `event_pages` (near-empty side table, not the event).
 
-## Verification
+## The cutover run
 
-Before declaring a step done:
+Export fresh from MySQL, then run the whole chain in order with `--verify`. A clean pass
+on all six is the sign-off:
+
+```bash
+node scripts/migrate-event-types.js events_types.json --verify
+node scripts/migrate-media.js paths.json --files ./storage          # additive; re-run --apply
+node scripts/migrate-players.js players.json --verify
+node scripts/migrate-pages.js events.json --verify
+node scripts/migrate-questions.js --verify
+node scripts/migrate-registers.js --verify
+```
+
+Each exits 1 while anything differs, so the sequence can be a single `&&` chain in a
+shell script. Media is the exception: it has nothing to diff, it just uploads whatever is
+new, so run it with `--apply` before the four that depend on it.
+
+Independent checks worth running once alongside:
 
 ```sql
--- counts to match against Strapi
 SELECT COUNT(*) FROM players;
 SELECT COUNT(*) FROM events;
 SELECT COUNT(*) FROM users_events;
 SELECT COUNT(DISTINCT hash) FROM events;   -- must equal COUNT(*)
 ```
 
-Then in Strapi: every migrated row has a non-null `legacy_id`, no duplicate
-`legacy_id` per content type, and every `hash` from MySQL resolves on the new site.
+Then in Strapi: no duplicate `legacy_id` per content type, and every `hash` from MySQL
+resolves on the new site.
 
 ## Running it
 
