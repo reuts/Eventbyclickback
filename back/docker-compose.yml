@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   strapi:
-    image: ghcr.io/avi-adam/strapievent:1.0.10
+    image: ghcr.io/avi-adam/strapievent:1.0.11
     container_name: strapi-app
     restart: always
     env_file:
