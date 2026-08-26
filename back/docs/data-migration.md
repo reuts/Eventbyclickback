@@ -45,7 +45,7 @@ Both are `(id, name)`. `events_types` → `api::event-type`. Categories have no 
 equivalent and the create wizard no longer asks for one — carry `category_id` into a
 note field or drop it, but decide before step 4.
 
-## Step 2 — `players`
+## Step 2 — `players`  ·  `scripts/migrate-players.js`
 
 | MySQL | Strapi | Notes |
 |---|---|---|
@@ -57,7 +57,23 @@ note field or drop it, but decide before step 4.
 | `app_user_id` | `owner` | resolve via the user's `legacy_id` |
 | `yaad_masof`, `yaad_key`, `isracard_key`, `payment_gateway` | — | **not migrated.** These are payment-gateway credentials; the new app uses external links only. Do not copy them. |
 
-## Step 3 — media
+```bash
+node scripts/migrate-players.js players.json --dump review.json   # dry run
+node scripts/migrate-players.js players.json --apply
+```
+
+`--dump` writes the payloads for review before anything is written. A dry run works
+without `STRAPI_API_TOKEN`, which is how the mapping gets checked before there is
+anywhere to write to.
+
+Two shapes the script handles that a naive translation gets wrong: a bare social handle
+(`@danastudio`) resolves against its platform rather than becoming
+`https://@danastudio`, and an `email_2` identical to `email` is dropped instead of
+carried through as a duplicate.
+
+**Run it after step 3**, so logos resolve.
+
+## Step 3 — media  ·  `scripts/migrate-media.js`
 
 The hard part, and the reason step 4 cannot be a straight SQL translation.
 
@@ -76,6 +92,19 @@ prod) and the returned numeric id written to the page. Plan:
 Do this **before** step 4 so the page write is a single request per event. Missing files
 are expected on old rows — log and continue with a null image rather than failing the
 run.
+
+```bash
+# review what would be uploaded, reading from a local copy of public/storage
+node scripts/migrate-media.js paths.json --files ./storage
+# upload; writes media-map.json incrementally so an interrupted run resumes
+node scripts/migrate-media.js paths.json --files ./storage --apply
+```
+
+The script normalises whatever the columns hold — a full URL, a `storage/...`
+fragment, or a bare filename — down to one path per file, so the same image
+referenced by several events uploads once. Inline `data:` values are skipped: there is
+no file behind them. The map is keyed by both the normalised path and every original
+spelling, so later steps can look up the raw column value.
 
 ## Step 4 — `events` → `api::page`
 
