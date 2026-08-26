@@ -40,6 +40,8 @@
 
 const fs = require('fs');
 const path = require('path');
+// Shared with the steps that read the map back, so the two cannot drift apart.
+const { toStoragePath } = require('./lib/media-map');
 
 const args = process.argv.slice(2);
 const inputPath = args.find((a) => !a.startsWith('--'));
@@ -59,29 +61,6 @@ const strapiToken = process.env.STRAPI_API_TOKEN;
 if (!inputPath) {
 	console.error('usage: node scripts/migrate-media.js <paths.json> [--apply] [--files <dir>] [--base <url>] [--out <file>]');
 	process.exit(1);
-}
-
-/**
- * Reduce a stored value to its path under `storage/`.
- *
- * The column holds whatever the app wrote over the years: a full URL, a
- * `storage/...` fragment, or a bare filename. `EventService::coverImage`
- * splits on `storage/` for the same reason.
- */
-function toStoragePath(value) {
-	const raw = String(value || '').trim();
-	if (!raw) return null;
-
-	// A base64 data URL is inline content, not a file — nothing to fetch.
-	if (raw.startsWith('data:')) return null;
-
-	const afterStorage = raw.split('storage/')[1];
-	if (afterStorage) return afterStorage.replace(/^\/+/, '').split('?')[0];
-
-	// A bare filename, from before paths were stored in full.
-	if (!raw.includes('/')) return `events/${raw}`;
-
-	return raw.replace(/^\/+/, '').split('?')[0];
 }
 
 function contentType(filename) {
