@@ -20,3 +20,9 @@ nginx/ssl/archive
 nginx/ssl/live
 nginx/ssl/renewal
 nginx/ssl/renewal-hooks
+
+# The Laravel export: 22k registrant names, emails and phone numbers, plus the
+# app_users bcrypt hashes. It is only ever read by scripts/migrate-*.js on a
+# workstation and must not be baked into a pushed image.
+migration-data
+*.ndjson
