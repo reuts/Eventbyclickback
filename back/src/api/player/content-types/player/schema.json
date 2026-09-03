@@ -19,7 +19,24 @@
     "email": {
       "type": "email"
     },
+    "email_2": {
+      "type": "email"
+    },
     "phone": {
+      "type": "string"
+    },
+    "phone_2": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "links": {
+      "type": "component",
+      "component": "contact.social-link",
+      "repeatable": true
+    },
+    "address": {
       "type": "string"
     },
     "logo": {
@@ -30,11 +47,26 @@
         "images"
       ]
     },
+    "legacy_id": {
+      "type": "integer"
+    },
+    "owner": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "players"
+    },
     "pages": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::page.page",
       "mappedBy": "player"
+    },
+    "registrants": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::register.register",
+      "mappedBy": "player_source"
     }
   }
 }

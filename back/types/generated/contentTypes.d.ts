@@ -528,6 +528,7 @@ export interface ApiEventTypeEventType extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text;
+    legacy_id: Schema.Attribute.Integer;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -593,11 +594,13 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
       Schema.Attribute.DefaultTo<true>;
     background_color: Schema.Attribute.String &
       Schema.Attribute.DefaultTo<'#e3a68b'>;
+    bottom_image: Schema.Attribute.Media<'images'>;
     branded: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     consolidated: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    custom_fields: Schema.Attribute.Component<'forms.custom-field', true>;
     desc_bg: Schema.Attribute.String & Schema.Attribute.DefaultTo<'#fef8f6'>;
     description: Schema.Attribute.RichText;
     disable_user_creation: Schema.Attribute.Boolean &
@@ -633,6 +636,7 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     footer_desc: Schema.Attribute.RichText;
     get_tickets_text: Schema.Attribute.String;
     goalID: Schema.Attribute.String;
+    guide_pdf: Schema.Attribute.Media<'files'>;
     has_chat: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     has_lecturer: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     has_register: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
@@ -647,7 +651,9 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     language: Schema.Attribute.Enumeration<['ltr', 'rtl']> &
       Schema.Attribute.DefaultTo<'rtl'>;
     lecturer_desc: Schema.Attribute.Text;
+    lecturer_image: Schema.Attribute.Media<'images'>;
     lecturer_name: Schema.Attribute.String;
+    legacy_id: Schema.Attribute.Integer;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::page.page'> &
       Schema.Attribute.Private;
@@ -655,12 +661,30 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     logo: Schema.Attribute.Media<'images'>;
     meeting_url: Schema.Attribute.String;
     name: Schema.Attribute.String & Schema.Attribute.Required;
-    name_position: Schema.Attribute.Enumeration<['top', 'bottom', 'center']> &
+    name_position: Schema.Attribute.Enumeration<
+      ['top', 'bottom', 'center', 'left', 'right', 'none']
+    > &
       Schema.Attribute.DefaultTo<'bottom'>;
+    page_type: Schema.Attribute.Enumeration<
+      ['save_spot', 'contact_me', 'guide_download']
+    > &
+      Schema.Attribute.DefaultTo<'save_spot'>;
+    payment_display: Schema.Attribute.Enumeration<['paid', 'free', 'hidden']> &
+      Schema.Attribute.DefaultTo<'free'>;
     payment_required: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
     payment_type: Schema.Attribute.Enumeration<
-      ['bit', 'paypal', 'credit_card', 'bank_transfer', 'other']
+      [
+        'url',
+        'paybox',
+        'paybox_personal',
+        'bit',
+        'donation',
+        'paypal',
+        'credit_card',
+        'bank_transfer',
+        'other',
+      ]
     >;
     payment_url: Schema.Attribute.String;
     pixabay_cover_image: Schema.Attribute.Boolean &
@@ -671,9 +695,14 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
       'manyToMany',
       'api::register.register'
     >;
+    second_extra_description: Schema.Attribute.Text;
     send_email_registration: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<true>;
     separate_event: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    show_bottom_image: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    show_middle_image: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
     show_strip: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     speaker: Schema.Attribute.Component<'content.speaker', false>;
@@ -682,6 +711,12 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     special_msg_bg: Schema.Attribute.String;
     special_msg_colour: Schema.Attribute.String &
       Schema.Attribute.DefaultTo<'#000000'>;
+    spintowin_enabled: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    spintowin_position: Schema.Attribute.Enumeration<
+      ['top1', 'top2', 'bottom']
+    >;
+    spintowin_token: Schema.Attribute.String;
     submit_btn_text: Schema.Attribute.String;
     text_color: Schema.Attribute.String & Schema.Attribute.DefaultTo<'#ffffff'>;
     ticket_link: Schema.Attribute.String;
@@ -708,10 +743,15 @@ export interface ApiPlayerPlayer extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    address: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
     email: Schema.Attribute.Email;
+    email_2: Schema.Attribute.Email;
+    legacy_id: Schema.Attribute.Integer;
+    links: Schema.Attribute.Component<'contact.social-link', true>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -720,9 +760,18 @@ export interface ApiPlayerPlayer extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     logo: Schema.Attribute.Media<'images'>;
     name: Schema.Attribute.String & Schema.Attribute.Required;
+    owner: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
     pages: Schema.Attribute.Relation<'oneToMany', 'api::page.page'>;
     phone: Schema.Attribute.String;
+    phone_2: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    registrants: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::register.register'
+    >;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -741,10 +790,16 @@ export interface ApiRegisterRegister extends Struct.CollectionTypeSchema {
   };
   attributes: {
     accept_terms: Schema.Attribute.Boolean;
+    birthday: Schema.Attribute.Date;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     email: Schema.Attribute.String;
+    extra_fields: Schema.Attribute.JSON;
+    first_name: Schema.Attribute.String;
+    gender: Schema.Attribute.String;
+    last_name: Schema.Attribute.String;
+    legacy_id: Schema.Attribute.Integer;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -752,8 +807,17 @@ export interface ApiRegisterRegister extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     name: Schema.Attribute.String;
+    newsletter: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     pages: Schema.Attribute.Relation<'manyToMany', 'api::page.page'>;
+    password: Schema.Attribute.Password & Schema.Attribute.Private;
+    phone: Schema.Attribute.String;
+    player_source: Schema.Attribute.Relation<'manyToOne', 'api::player.player'>;
+    profession: Schema.Attribute.String;
+    profile: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    role: Schema.Attribute.Enumeration<['user', 'admin']> &
+      Schema.Attribute.DefaultTo<'user'>;
+    signed_up_at: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1222,14 +1286,22 @@ export interface PluginUsersPermissionsUser
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     confirmationToken: Schema.Attribute.String & Schema.Attribute.Private;
     confirmed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    create_event_form: Schema.Attribute.JSON;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    date_of_birth: Schema.Attribute.Date;
     email: Schema.Attribute.Email &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
+    first_name: Schema.Attribute.String;
+    gender: Schema.Attribute.Integer;
+    is_from_spin_to_win: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    last_name: Schema.Attribute.String;
+    legacy_id: Schema.Attribute.Integer;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -1241,6 +1313,7 @@ export interface PluginUsersPermissionsUser
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
+    players: Schema.Attribute.Relation<'oneToMany', 'api::player.player'>;
     provider: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     resetPasswordToken: Schema.Attribute.String & Schema.Attribute.Private;

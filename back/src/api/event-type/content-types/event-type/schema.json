@@ -19,6 +19,9 @@
     "description": {
       "type": "text"
     },
+    "legacy_id": {
+      "type": "integer"
+    },
     "pages": {
       "type": "relation",
       "relation": "oneToMany",

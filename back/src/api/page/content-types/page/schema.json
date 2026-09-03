@@ -20,6 +20,18 @@
       "type": "uid",
       "targetField": "name"
     },
+    "legacy_id": {
+      "type": "integer"
+    },
+    "page_type": {
+      "type": "enumeration",
+      "default": "save_spot",
+      "enum": [
+        "save_spot",
+        "contact_me",
+        "guide_download"
+      ]
+    },
     "event_type": {
       "type": "relation",
       "relation": "manyToOne",
@@ -32,7 +44,10 @@
       "enum": [
         "top",
         "bottom",
-        "center"
+        "center",
+        "left",
+        "right",
+        "none"
       ]
     },
     "field_profession": {
@@ -68,7 +83,11 @@
     "payment_type": {
       "type": "enumeration",
       "enum": [
+        "url",
+        "paybox",
+        "paybox_personal",
         "bit",
+        "donation",
         "paypal",
         "credit_card",
         "bank_transfer",
@@ -106,6 +125,33 @@
       "required": false,
       "allowedTypes": [
         "images"
+      ]
+    },
+    "bottom_image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "show_bottom_image": {
+      "type": "boolean",
+      "default": false
+    },
+    "spintowin_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "spintowin_token": {
+      "type": "string"
+    },
+    "spintowin_position": {
+      "type": "enumeration",
+      "enum": [
+        "top1",
+        "top2",
+        "bottom"
       ]
     },
     "language": {
@@ -313,11 +359,48 @@
       "component": "content.speaker",
       "repeatable": false
     },
+    "custom_fields": {
+      "type": "component",
+      "component": "forms.custom-field",
+      "repeatable": true
+    },
     "registers": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::register.register",
       "mappedBy": "pages"
+    },
+    "payment_display": {
+      "type": "enumeration",
+      "default": "free",
+      "enum": [
+        "paid",
+        "free",
+        "hidden"
+      ]
+    },
+    "show_middle_image": {
+      "type": "boolean",
+      "default": false
+    },
+    "second_extra_description": {
+      "type": "text"
+    },
+    "lecturer_image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "guide_pdf": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "files"
+      ]
     }
   }
 }

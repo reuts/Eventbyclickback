@@ -1,0 +1,29 @@
+{
+  "collectionName": "components_contact_social_links",
+  "info": {
+    "displayName": "Social Link",
+    "description": "A single labelled link on an organizer profile"
+  },
+  "options": {},
+  "attributes": {
+    "type": {
+      "type": "enumeration",
+      "required": true,
+      "default": "website",
+      "enum": [
+        "website",
+        "facebook",
+        "instagram",
+        "linkedin",
+        "youtube",
+        "tiktok",
+        "whatsapp",
+        "other"
+      ]
+    },
+    "url": {
+      "type": "string",
+      "required": true
+    }
+  }
+}
