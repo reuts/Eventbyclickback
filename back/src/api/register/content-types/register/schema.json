@@ -68,8 +68,7 @@
       "type": "boolean"
     },
     "legacy_id": {
-      "type": "integer",
-      "private": true
+      "type": "integer"
     },
     "signed_up_at": {
       "type": "datetime"

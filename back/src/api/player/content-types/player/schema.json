@@ -48,8 +48,7 @@
       ]
     },
     "legacy_id": {
-      "type": "integer",
-      "private": true
+      "type": "integer"
     },
     "owner": {
       "type": "relation",

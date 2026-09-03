@@ -85,8 +85,7 @@
       "default": false
     },
     "legacy_id": {
-      "type": "integer",
-      "private": true
+      "type": "integer"
     },
     "players": {
       "type": "relation",

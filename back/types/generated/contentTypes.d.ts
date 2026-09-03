@@ -528,6 +528,7 @@ export interface ApiEventTypeEventType extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text;
+    legacy_id: Schema.Attribute.Integer;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -635,6 +636,7 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     footer_desc: Schema.Attribute.RichText;
     get_tickets_text: Schema.Attribute.String;
     goalID: Schema.Attribute.String;
+    guide_pdf: Schema.Attribute.Media<'files'>;
     has_chat: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     has_lecturer: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     has_register: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
@@ -649,8 +651,9 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     language: Schema.Attribute.Enumeration<['ltr', 'rtl']> &
       Schema.Attribute.DefaultTo<'rtl'>;
     lecturer_desc: Schema.Attribute.Text;
+    lecturer_image: Schema.Attribute.Media<'images'>;
     lecturer_name: Schema.Attribute.String;
-    legacy_id: Schema.Attribute.Integer & Schema.Attribute.Private;
+    legacy_id: Schema.Attribute.Integer;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::page.page'> &
       Schema.Attribute.Private;
@@ -658,12 +661,30 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     logo: Schema.Attribute.Media<'images'>;
     meeting_url: Schema.Attribute.String;
     name: Schema.Attribute.String & Schema.Attribute.Required;
-    name_position: Schema.Attribute.Enumeration<['top', 'bottom', 'center']> &
+    name_position: Schema.Attribute.Enumeration<
+      ['top', 'bottom', 'center', 'left', 'right', 'none']
+    > &
       Schema.Attribute.DefaultTo<'bottom'>;
+    page_type: Schema.Attribute.Enumeration<
+      ['save_spot', 'contact_me', 'guide_download']
+    > &
+      Schema.Attribute.DefaultTo<'save_spot'>;
+    payment_display: Schema.Attribute.Enumeration<['paid', 'free', 'hidden']> &
+      Schema.Attribute.DefaultTo<'free'>;
     payment_required: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
     payment_type: Schema.Attribute.Enumeration<
-      ['bit', 'paypal', 'credit_card', 'bank_transfer', 'other']
+      [
+        'url',
+        'paybox',
+        'paybox_personal',
+        'bit',
+        'donation',
+        'paypal',
+        'credit_card',
+        'bank_transfer',
+        'other',
+      ]
     >;
     payment_url: Schema.Attribute.String;
     pixabay_cover_image: Schema.Attribute.Boolean &
@@ -674,11 +695,14 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
       'manyToMany',
       'api::register.register'
     >;
+    second_extra_description: Schema.Attribute.Text;
     send_email_registration: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<true>;
     separate_event: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
     show_bottom_image: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    show_middle_image: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
     show_strip: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     speaker: Schema.Attribute.Component<'content.speaker', false>;
@@ -726,9 +750,7 @@ export interface ApiPlayerPlayer extends Struct.CollectionTypeSchema {
     description: Schema.Attribute.Text;
     email: Schema.Attribute.Email;
     email_2: Schema.Attribute.Email;
-    facebook: Schema.Attribute.String & Schema.Attribute.Private;
-    instagram: Schema.Attribute.String & Schema.Attribute.Private;
-    legacy_id: Schema.Attribute.Integer & Schema.Attribute.Private;
+    legacy_id: Schema.Attribute.Integer;
     links: Schema.Attribute.Component<'contact.social-link', true>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -744,6 +766,7 @@ export interface ApiPlayerPlayer extends Struct.CollectionTypeSchema {
     >;
     pages: Schema.Attribute.Relation<'oneToMany', 'api::page.page'>;
     phone: Schema.Attribute.String;
+    phone_2: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     registrants: Schema.Attribute.Relation<
       'oneToMany',
@@ -752,7 +775,6 @@ export interface ApiPlayerPlayer extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    website: Schema.Attribute.String & Schema.Attribute.Private;
   };
 }
 
@@ -777,7 +799,7 @@ export interface ApiRegisterRegister extends Struct.CollectionTypeSchema {
     first_name: Schema.Attribute.String;
     gender: Schema.Attribute.String;
     last_name: Schema.Attribute.String;
-    legacy_id: Schema.Attribute.Integer & Schema.Attribute.Private;
+    legacy_id: Schema.Attribute.Integer;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -795,6 +817,7 @@ export interface ApiRegisterRegister extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     role: Schema.Attribute.Enumeration<['user', 'admin']> &
       Schema.Attribute.DefaultTo<'user'>;
+    signed_up_at: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1275,8 +1298,10 @@ export interface PluginUsersPermissionsUser
       }>;
     first_name: Schema.Attribute.String;
     gender: Schema.Attribute.Integer;
+    is_from_spin_to_win: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     last_name: Schema.Attribute.String;
-    legacy_id: Schema.Attribute.Integer & Schema.Attribute.Private;
+    legacy_id: Schema.Attribute.Integer;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',

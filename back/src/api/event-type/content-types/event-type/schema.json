@@ -20,8 +20,7 @@
       "type": "text"
     },
     "legacy_id": {
-      "type": "integer",
-      "private": true
+      "type": "integer"
     },
     "pages": {
       "type": "relation",

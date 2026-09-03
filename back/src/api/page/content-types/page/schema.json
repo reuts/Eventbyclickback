@@ -21,8 +21,7 @@
       "targetField": "name"
     },
     "legacy_id": {
-      "type": "integer",
-      "private": true
+      "type": "integer"
     },
     "page_type": {
       "type": "enumeration",

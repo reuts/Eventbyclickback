@@ -129,3 +129,6 @@ dist
 build
 .strapi-updater.json
 .strapi-cloud.json
+# Laravel export used by scripts/migrate-*.js — contains registrant PII
+# and bcrypt hashes. Never commit.
+/migration-data/
