@@ -340,3 +340,48 @@ API and get validation, component wiring and lifecycle hooks for free.
 
 **Claude's permission classifier blocks the `--apply` step** — the user runs that
 command themselves.
+
+## Recreating the container on the server
+
+`config/plugins.ts` reads the Cloudinary keys through `env()`, and Docker fixes
+`env_file` at **create** time — so editing `/home/ubuntu/strapi/back/.env` and running
+`docker restart` changes nothing. The container has to be replaced.
+
+**`docker-compose` on that host is v1 (python) and is broken against the installed
+engine.** `docker-compose up -d --force-recreate` dies with
+`KeyError: 'ContainerConfig'` *after* it has already stopped the container and renamed
+it to `<hash>_strapi-app`, which takes the site down. Recreate by hand instead:
+
+```bash
+sudo docker rm -f strapi-app
+sudo docker run -d --name strapi-app --restart always \
+  --env-file /home/ubuntu/strapi/back/.env \
+  -p 1337:1337 --network back_strapi_net \
+  ghcr.io/avi-adam/strapievent:<version>
+sudo docker network connect postgres_default strapi-app
+```
+
+Both networks matter: `postgres_default` is how it reaches `postgres-db`.
+
+Nothing durable lives in the container — content is in Postgres, uploads are on
+Cloudinary — but the migration's own scratch does, and is lost on replace:
+
+| path | re-stage from |
+|---|---|
+| `/tmp/media-files` (1,394 files, 281 MB) | host `/tmp/media-files` |
+| `/tmp/media-paths.json` | host `/home/ubuntu/migration/` |
+| `/tmp/.migration-token` | host `/home/ubuntu/.migration-token` |
+| `/app/scripts` | `docker cp` from this repo — the image's copy is only as new as its tag |
+
+Check the keys reached the process before uploading anything:
+
+```bash
+sudo docker exec strapi-app printenv CLOUDINARY_NAME CLOUDINARY_KEY CLOUDINARY_SECRET | grep -c '^your_'   # want 0
+```
+
+and that the keys themselves are live, without printing them:
+
+```bash
+set -a; . /home/ubuntu/strapi/back/.env; set +a
+curl -s -u "$CLOUDINARY_KEY:$CLOUDINARY_SECRET" "https://api.cloudinary.com/v1_1/$CLOUDINARY_NAME/ping"
+```
