@@ -185,7 +185,7 @@
       "type": "datetime"
     },
     "ticket_link": {
-      "type": "string"
+      "type": "text"
     },
     "special_msg": {
       "type": "text"
