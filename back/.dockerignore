@@ -1,3 +1,4 @@
+.migration-token
 node_modules
 npm-debug.log
 .git
