@@ -189,8 +189,12 @@ async function main() {
 	const users = offline
 		? []
 		: await client.fetchAll('/api/users?fields[0]=id&fields[1]=documentId&fields[2]=legacy_id');
+	// The numeric id, not the documentId. `plugin::users-permissions.user` is
+	// not a draft-and-publish content type, and Strapi resolves relations to it
+	// by numeric id only — a documentId is rejected outright with
+	// "Invalid relations", which is what stopped 101 of the 154 owned players.
 	const ownerByLegacyId = new Map(
-		[...indexByLegacyId(users)].map(([id, u]) => [id, u.documentId ?? String(u.id)])
+		[...indexByLegacyId(users)].map(([id, u]) => [id, u.id])
 	);
 
 	// The diff compares logo and owner, so both have to come back populated.
