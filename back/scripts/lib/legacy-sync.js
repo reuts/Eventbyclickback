@@ -71,6 +71,15 @@ function createClient({ url, token }) {
  * id, relations by document id, and picking the wrong one makes every row look
  * changed on every run.
  */
+/** Object keys sorted at every depth; arrays keep their order, which means something. */
+function sortKeys(value) {
+	if (Array.isArray(value)) return value.map(sortKeys);
+	if (value && typeof value === 'object') {
+		return Object.fromEntries(Object.keys(value).sort().map((key) => [key, sortKeys(value[key])]));
+	}
+	return value;
+}
+
 function normalise(value, kind) {
 	if (value === undefined || value === null || value === '') return null;
 
@@ -109,7 +118,10 @@ function normalise(value, kind) {
 		return JSON.stringify(stripped);
 	}
 
-	if (kind === 'json') return JSON.stringify(value);
+	// Postgres jsonb does not keep key order — it stores keys sorted — so a
+	// signup answered as prop_638, prop_641, prop_640 comes back as 638, 639,
+	// 640, 641. Compared unsorted, 3,998 signups looked changed on every run.
+	if (kind === 'json') return JSON.stringify(sortKeys(value));
 
 	// Strapi takes a time as "HH:mm:ss.SSS" and hands it back as "HH:mm:ss";
 	// compared as plain strings, every page with a start time looked changed.
