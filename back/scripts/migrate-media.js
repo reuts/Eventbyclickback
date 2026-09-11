@@ -89,6 +89,11 @@ async function readBytes(storagePath) {
 	const url = `${baseUrl}/storage/${storagePath}`;
 	const response = await fetch(url);
 	if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
+	// The old admin host answers a missing file with 200 and a 2 KB HTML error
+	// page. Without this, that page would land in the media library as the
+	// event's cover image.
+	const type = response.headers.get('content-type') || '';
+	if (type.startsWith('text/html')) throw new Error(`got an HTML page, not a file, for ${url}`);
 
 	return Buffer.from(await response.arrayBuffer());
 }
