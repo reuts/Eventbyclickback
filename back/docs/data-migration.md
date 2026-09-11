@@ -345,33 +345,64 @@ command themselves.
 
 `config/plugins.ts` reads the Cloudinary keys through `env()`, and Docker fixes
 `env_file` at **create** time — so editing `/home/ubuntu/strapi/back/.env` and running
-`docker restart` changes nothing. The container has to be replaced.
-
-**`docker-compose` on that host is v1 (python) and is broken against the installed
-engine.** `docker-compose up -d --force-recreate` dies with
-`KeyError: 'ContainerConfig'` *after* it has already stopped the container and renamed
-it to `<hash>_strapi-app`, which takes the site down. Recreate by hand instead:
+`docker restart` changes nothing. The container has to be replaced. Deploying a new
+image tag is the same operation.
 
 ```bash
-sudo docker rm -f strapi-app
-sudo docker run -d --name strapi-app --restart always \
-  --env-file /home/ubuntu/strapi/back/.env \
-  -p 1337:1337 --network back_strapi_net \
-  ghcr.io/avi-adam/strapievent:<version>
-sudo docker network connect postgres_default strapi-app
+cd /home/ubuntu/strapi/back
+sudo sed -i 's|strapievent:[0-9.]*|strapievent:<version>|' docker-compose.yml
+sudo docker compose up -d
 ```
 
-Both networks matter: `postgres_default` is how it reaches `postgres-db`.
+That is **compose v2** (`docker compose`, with a space). Two ways this has gone wrong:
+
+- **`docker-compose` (hyphen) is the old python v1** and is broken against the installed
+  engine: it dies with `KeyError: 'ContainerConfig'` *after* stopping the container and
+  renaming it to `<hash>_strapi-app`, which takes the site down.
+- **Do not hand-build it with `docker run` + `docker network connect`.** That was the
+  workaround on 2026-09-04, and it lasted until the next reboot. On 2026-09-08 the host
+  restarted; the container failed to come back (see below), and the failed start dropped
+  the `postgres_default` attachment that had been added by `network connect`. Every later
+  start then died on `getaddrinfo ENOTFOUND postgres-db`. Compose declares both networks,
+  so it attaches them at create time.
+
+### Rollback containers must not auto-start
+
+Keeping the previous container as `strapi-app-old-<version>` is a fine rollback, but
+set `sudo docker update --restart=no strapi-app-old-<version>` when you park it. The
+2026-09-08 reboot started both it and `strapi-app` with `restart: always`; the old one
+won the race for port 1337 by 30 ms, `strapi-app` failed with
+`Bind for 0.0.0.0:1337 failed: port is already allocated`, and then the old one crashed
+against the current schema — leaving nothing running for three days. `restart: always`
+does not retry a container that failed at start.
+
+After any reboot, check:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}
+' http://localhost:1337/_health   # want 204
+```
+
+### What is lost on replace
 
 Nothing durable lives in the container — content is in Postgres, uploads are on
-Cloudinary — but the migration's own scratch does, and is lost on replace:
+Cloudinary — but the migration's own scratch does. Stage it from the host, which keeps
+it under `/home/ubuntu/migration/`, **not `/tmp`** (the host's `/tmp` is cleared on
+reboot too):
 
-| path | re-stage from |
+| container path | host copy |
 |---|---|
-| `/tmp/media-files` (1,394 files, 281 MB) | host `/tmp/media-files` |
-| `/tmp/media-paths.json` | host `/home/ubuntu/migration/` |
-| `/tmp/.migration-token` | host `/home/ubuntu/.migration-token` |
+| `/tmp/media-files` | `/home/ubuntu/migration/media-files` |
+| `/tmp/media-paths.json` | `/home/ubuntu/migration/media-paths.json` |
+| `/tmp/media-map.json` | `/home/ubuntu/migration/media-map.json` — **copy it out before replacing**; players and pages need it |
+| `/tmp/.migration-token` | `/home/ubuntu/.migration-token` |
 | `/app/scripts` | `docker cp` from this repo — the image's copy is only as new as its tag |
+
+The media files come from the CodeIgniter admin's upload folder on the same host,
+`/home/ubuntu/admin/admin/assets/images/events/`, plus Laravel's
+`/home/ubuntu/app/storage/app/public/`. 1,288 of the 1,755 referenced files are there;
+the other 467 are gone everywhere (`app` returns 404; `admin.eventbyclick.com` returns 200
+with an HTML error page, which `migrate-media.js` now refuses).
 
 Check the keys reached the process before uploading anything:
 
