@@ -130,7 +130,7 @@ function strayEmails(row) {
 }
 
 /** How each field is compared; anything absent is compared as a scalar. */
-const KINDS = { logo: 'media', owner: 'relation', links: 'component' };
+const KINDS = { logo: 'media', owner: 'user', links: 'component' };
 
 function toPlayer(row, context) {
 	const { mediaMap, ownerByLegacyId, notes } = context;
@@ -138,7 +138,7 @@ function toPlayer(row, context) {
 
 	let logo = null;
 	if (text(row.image)) {
-		logo = mediaId(mediaMap, row.image);
+		logo = mediaId(mediaMap, row.image, 'players');
 		if (!logo) note(`logo not in the media map: ${String(row.image).slice(0, 80)}`);
 	}
 

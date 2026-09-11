@@ -79,6 +79,15 @@ function normalise(value, kind) {
 		return Number(value);
 	}
 
+	// A users-permissions user is not draft-and-publish, so it is linked by
+	// numeric id (see migrate-players.js) and has to be compared by it too.
+	// Treating it as a plain relation compared "42" against its documentId,
+	// and every owned player showed as changed on every run.
+	if (kind === 'user') {
+		if (typeof value === 'object') return String(value.id ?? '');
+		return String(value);
+	}
+
 	if (kind === 'relation') {
 		if (Array.isArray(value)) return value.map((v) => normalise(v, 'relation'));
 		if (typeof value === 'object') return value.documentId ?? String(value.id ?? '');
@@ -101,6 +110,13 @@ function normalise(value, kind) {
 	}
 
 	if (kind === 'json') return JSON.stringify(value);
+
+	// Strapi takes a time as "HH:mm:ss.SSS" and hands it back as "HH:mm:ss";
+	// compared as plain strings, every page with a start time looked changed.
+	if (kind === 'time') {
+		const match = String(value).match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+		return match ? `${match[1].padStart(2, '0')}:${match[2]}:${match[3] ?? '00'}` : String(value);
+	}
 
 	// Dates come back from Strapi in a different string form than they went in.
 	if (kind === 'datetime') {
@@ -258,13 +274,17 @@ function report(stats, { apply, verify }) {
 	console.log(`  failed   : ${stats.failed.length}`);
 	console.log(`  in Strapi, not in the export: ${stats.orphans.length}`);
 
+	// `--full` lists every row. The first 20 are enough to spot a pattern, but
+	// not to confirm an apply touches only the fields it is meant to.
+	const limit = process.argv.includes('--full') ? Infinity : 20;
+
 	for (const [label, items] of [
 		['changed', stats.changes],
 		['failed', stats.failed],
 		['orphan', stats.orphans]
 	]) {
-		for (const item of items.slice(0, 20)) console.log(`    ${label}: ${item}`);
-		if (items.length > 20) console.log(`    … and ${items.length - 20} more ${label}`);
+		for (const item of items.slice(0, limit)) console.log(`    ${label}: ${item}`);
+		if (items.length > limit) console.log(`    … and ${items.length - limit} more ${label}`);
 	}
 
 	return stats.failed.length === 0 && (!verify || (stats.created === 0 && stats.updated === 0));

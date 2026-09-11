@@ -55,6 +55,9 @@ function flag(name, fallback) {
 const filesDir = flag('files', null);
 const baseUrl = flag('base', 'https://app.eventbyclick.com').replace(/\/+$/, '');
 const outPath = flag('out', 'media-map.json');
+// Which folder bare filenames live in — `events` for event columns, `players`
+// for `players.image`. See toStoragePath.
+const folder = flag('folder', 'events');
 const strapiUrl = (process.env.STRAPI_API_URL || 'http://localhost:1337').replace(/\/+$/, '');
 const strapiToken = process.env.STRAPI_API_TOKEN;
 
@@ -130,7 +133,7 @@ async function main() {
 	let skippedInline = 0;
 
 	for (const value of values) {
-		const storagePath = toStoragePath(value);
+		const storagePath = toStoragePath(value, folder);
 		if (!storagePath) {
 			if (String(value || '').startsWith('data:')) skippedInline++;
 			continue;
@@ -172,8 +175,11 @@ async function main() {
 			map[storagePath] = id;
 
 			// Every spelling the columns used points at the same id, so the
-			// later scripts can look up the raw column value directly.
-			for (const original of originals) map[original] = id;
+			// later scripts can look up the raw column value directly — except
+			// a bare filename, which mediaId resolves through its folder.
+			for (const original of originals) {
+				if (String(original).includes('/')) map[original] = id;
+			}
 
 			stats.uploaded++;
 			fs.writeFileSync(outPath, JSON.stringify(map, null, 2));

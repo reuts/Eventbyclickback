@@ -398,11 +398,19 @@ reboot too):
 | `/tmp/.migration-token` | `/home/ubuntu/.migration-token` |
 | `/app/scripts` | `docker cp` from this repo — the image's copy is only as new as its tag |
 
-The media files come from the CodeIgniter admin's upload folder on the same host,
-`/home/ubuntu/admin/admin/assets/images/events/`, plus Laravel's
-`/home/ubuntu/app/storage/app/public/`. 1,288 of the 1,755 referenced files are there;
-the other 467 are gone everywhere (`app` returns 404; `admin.eventbyclick.com` returns 200
-with an HTML error page, which `migrate-media.js` now refuses).
+The media files come from the CodeIgniter admin's upload folders on the same host —
+`/home/ubuntu/admin/admin/assets/images/events/` for event columns and
+`.../images/players/` for `players.image` — plus Laravel's
+`/home/ubuntu/app/storage/app/public/`. The columns hold bare filenames with no folder,
+so the player run needs `--folder players`:
+
+```bash
+node scripts/migrate-media.js player-paths.json --folder players --files /tmp/media-files --out media-map.json --apply
+```
+
+Found on 2026-09-11: 1,288 of 1,755 event files and 110 of 151 player files. The rest are
+gone everywhere (`app` returns 404; `admin.eventbyclick.com` returns 200 with an HTML
+error page, which `migrate-media.js` now refuses).
 
 Check the keys reached the process before uploading anything:
 

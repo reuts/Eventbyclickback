@@ -13,8 +13,13 @@
  * The column holds whatever the app wrote over the years: a full URL, a
  * `storage/...` fragment, or a bare filename. `EventService::coverImage`
  * splits on `storage/` for the same reason.
+ *
+ * A bare filename carries no folder, and the folder depends on the column:
+ * the CodeIgniter admin kept event images in `assets/images/events/` and
+ * player logos in `assets/images/players/`. Assuming `events/` for both is
+ * what left all 151 player logos unresolved on the first run.
  */
-function toStoragePath(value) {
+function toStoragePath(value, folder = 'events') {
 	const raw = String(value || '').trim();
 	if (!raw) return null;
 
@@ -25,7 +30,7 @@ function toStoragePath(value) {
 	if (afterStorage) return afterStorage.replace(/^\/+/, '').split('?')[0];
 
 	// A bare filename, from before paths were stored in full.
-	if (!raw.includes('/')) return `events/${raw}`;
+	if (!raw.includes('/')) return `${folder}/${raw}`;
 
 	return raw.replace(/^\/+/, '').split('?')[0];
 }
@@ -36,14 +41,17 @@ function toStoragePath(value) {
  * The map is keyed by both the normalised path and every original spelling, so
  * the raw value usually hits directly; the normalised form is the fallback for
  * a spelling that appeared only after the map was written.
+ *
+ * Except a bare filename: the same name can exist in both folders, so it is
+ * resolved only through the folder the caller names, never the raw key.
  */
-function mediaId(map, value) {
+function mediaId(map, value, folder = 'events') {
 	const raw = String(value || '').trim();
 	if (!raw) return null;
 
-	if (map[raw]) return map[raw];
+	if (raw.includes('/') && map[raw]) return map[raw];
 
-	const storagePath = toStoragePath(raw);
+	const storagePath = toStoragePath(raw, folder);
 	return (storagePath && map[storagePath]) || null;
 }
 

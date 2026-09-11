@@ -233,6 +233,8 @@ const KINDS = {
 	event_type: 'relation',
 	event_date: 'datetime',
 	event_end_date: 'datetime',
+	time: 'time',
+	end_time: 'time',
 	visual_embeds: 'component'
 };
 
