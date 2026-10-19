@@ -27,7 +27,15 @@
  *   UNION SELECT image_2 FROM events WHERE image_2 IS NOT NULL AND image_2 <> ''
  *   UNION SELECT logo    FROM events WHERE logo    IS NOT NULL AND logo    <> ''
  *   UNION SELECT guide_pdf FROM events WHERE guide_pdf IS NOT NULL AND guide_pdf <> ''
- *   UNION SELECT image   FROM players WHERE image   IS NOT NULL AND image   <> '';
+ *   UNION SELECT visual_embed_2 FROM events WHERE visual_embed_type_2 = 'image' AND visual_embed_2 <> ''
+ *   UNION SELECT visual_embed_3 FROM events WHERE visual_embed_type_3 = 'image' AND visual_embed_3 <> '';
+ *
+ * and, separately with `--folder players`:
+ *
+ *   SELECT image FROM players WHERE image IS NOT NULL AND image <> '';
+ *
+ * `visual_embed_2/3` are the middle and bottom images migrate-pages reads;
+ * leaving them out of this list is what left 244 of them empty on the first run.
  *
  * With `--files <dir>`, bytes are read from a local copy of `public/storage`
  * (copy it off the host once with tar/scp — one request per file over the
@@ -54,6 +62,8 @@ function flag(name, fallback) {
 
 const filesDir = flag('files', null);
 const baseUrl = flag('base', 'https://app.eventbyclick.com').replace(/\/+$/, '');
+// Where the CodeIgniter admin serves `assets/images/` from — see readBytes.
+const legacyBase = flag('legacy-base', 'https://admin.eventbyclick.com/admin').replace(/\/+$/, '');
 const outPath = flag('out', 'media-map.json');
 // Which folder bare filenames live in — `events` for event columns, `players`
 // for `players.image`. See toStoragePath.
@@ -81,7 +91,39 @@ function contentType(filename) {
 	);
 }
 
-/** Local copy first; the public site is the fallback. */
+/** A dropped connection is not a missing file — try again before giving up. */
+async function fetchWithRetry(url, attempts = 3) {
+	for (let i = 1; ; i++) {
+		try {
+			return await fetch(url);
+		} catch (err) {
+			if (i >= attempts) throw err;
+			await new Promise((resolve) => setTimeout(resolve, 1000 * i));
+		}
+	}
+}
+
+async function fetchFile(url) {
+	const response = await fetchWithRetry(url);
+	if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
+	// The old admin host answers a missing file with 200 and a 2 KB HTML error
+	// page. Without this, that page would land in the media library as the
+	// event's cover image.
+	const type = response.headers.get('content-type') || '';
+	if (type.startsWith('text/html')) throw new Error(`HTTP 404 (an HTML page, not a file) for ${url}`);
+
+	return Buffer.from(await response.arrayBuffer());
+}
+
+/**
+ * Local copy first, then Laravel's `storage/`, then the CodeIgniter admin.
+ *
+ * A bare filename was uploaded through the CodeIgniter admin and lives only
+ * there, under `/admin/assets/images/<folder>/` — Laravel's
+ * `ImageService::eventsImage` builds the same URL from `EVENTS_APP_URL`.
+ * Looking for those under `storage/` alone is what reported ~400 existing
+ * images as missing on the first run.
+ */
 async function readBytes(storagePath) {
 	if (filesDir) {
 		const local = path.join(filesDir, storagePath);
@@ -89,16 +131,14 @@ async function readBytes(storagePath) {
 		// fall through — the file may exist only on the live site
 	}
 
-	const url = `${baseUrl}/storage/${storagePath}`;
-	const response = await fetch(url);
-	if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
-	// The old admin host answers a missing file with 200 and a 2 KB HTML error
-	// page. Without this, that page would land in the media library as the
-	// event's cover image.
-	const type = response.headers.get('content-type') || '';
-	if (type.startsWith('text/html')) throw new Error(`got an HTML page, not a file, for ${url}`);
-
-	return Buffer.from(await response.arrayBuffer());
+	try {
+		return await fetchFile(`${baseUrl}/storage/${storagePath}`);
+	} catch (err) {
+		const [folderName, ...rest] = storagePath.split('/');
+		if (!rest.length) throw err;
+		// encodeURI, not encodeURIComponent: the host answers 400 to an encoded comma.
+		return fetchFile(`${legacyBase}/assets/images/${folderName}/${encodeURI(rest.join('/'))}`);
+	}
 }
 
 async function upload(storagePath, bytes) {
