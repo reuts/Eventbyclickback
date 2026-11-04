@@ -262,6 +262,10 @@
       "type": "boolean",
       "default": true
     },
+    "accessibility_enabled": {
+      "type": "boolean",
+      "default": false
+    },
     "upper_strip": {
       "type": "boolean",
       "default": true
