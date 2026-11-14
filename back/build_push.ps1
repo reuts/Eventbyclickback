@@ -5,7 +5,7 @@
 $GITHUB_USERNAME = "avi-adam"
 $REPO_NAME = "strapievent"
 $IMAGE_NAME = "ghcr.io/${GITHUB_USERNAME}/${REPO_NAME}"
-$VERSION = "1.0.15"
+$VERSION = "1.0.16"
 $TIMESTAMP = Get-Date -Format "yyyyMMdd-HHmmss"
 
 Write-Host ""
