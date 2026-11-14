@@ -266,6 +266,34 @@
       "type": "boolean",
       "default": false
     },
+    "cover_layout": {
+      "type": "enumeration",
+      "enum": [
+        "full",
+        "color",
+        "split_blur",
+        "split_panel"
+      ]
+    },
+    "cover_side": {
+      "type": "enumeration",
+      "default": "right",
+      "enum": [
+        "right",
+        "left"
+      ]
+    },
+    "cover_bg_color": {
+      "type": "string"
+    },
+    "image_desktop": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
     "upper_strip": {
       "type": "boolean",
       "default": true
